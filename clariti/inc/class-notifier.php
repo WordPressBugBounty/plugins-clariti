@@ -84,7 +84,7 @@ class Notifier {
 				Admin::send_admin_notification( 'clariti-updated-option', 'clariti-updated-option-error', 'Unable to connect to Clariti: ' . $exception->getMessage(), 'error' );
 			}
 
-			error_log( 'CLARITI:ERROR - action_added_option - ' . $exception->getMessage() );
+			error_log( 'CLARITI:ERROR - action_added_option - ' . $exception->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 	}
 
@@ -137,7 +137,7 @@ class Notifier {
 				Admin::send_admin_notification( 'clariti-updated-option', 'clariti-updated-option-error', 'Unable to connect to Clariti: ' . $exception->getMessage(), 'error' );
 			}
 
-			error_log( 'CLARITI:ERROR - action_updated_option - ' . $exception->getMessage() );
+			error_log( 'CLARITI:ERROR - action_updated_option - ' . $exception->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 	}
 
@@ -245,8 +245,8 @@ class Notifier {
 	/**
 	 * Inform Clariti when an approved comment is updated.
 	 *
-	 * @param integer    $id      The comment ID.
-	 * @param WP_Comment $comment Comment object.
+	 * @param integer     $id      The comment ID.
+	 * @param \WP_Comment $comment Comment object.
 	 */
 	public static function action_wp_insert_comment( $id, $comment ) {
 		if ( 1 !== (int) $comment->comment_approved ) {
@@ -392,7 +392,7 @@ class Notifier {
 
 			self::send_clariti_payload( $payload );
 		} catch ( \Exception $exception ) {
-			error_log( 'CLARITI:ERROR - action_updated_option - ' . $exception->getMessage() );
+			error_log( 'CLARITI:ERROR - action_updated_option - ' . $exception->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 	}
 
@@ -406,8 +406,8 @@ class Notifier {
 			$host = CLARITI_API_HOST;
 		} elseif ( get_option( Admin::API_HOST_OPTION, '' ) ) {
 			$host = get_option( Admin::API_HOST_OPTION, '' );
-		} elseif ( ! empty( $_POST[ Admin::API_HOST_OPTION ] ) && ! Admin::is_valid_api_host( $_POST[ Admin::API_HOST_OPTION ] ) ) {
-			$host = $_POST[ Admin::API_HOST_OPTION ];
+		} elseif ( ! empty( $_POST[ Admin::API_HOST_OPTION ] ) && ! Admin::is_valid_api_host( sanitize_text_field( wp_unslash( $_POST[ Admin::API_HOST_OPTION ] ) ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$host = sanitize_text_field( wp_unslash( $_POST[ Admin::API_HOST_OPTION ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		} else {
 			$host = self::API_HOST_DEFAULT;
 		}
@@ -455,23 +455,23 @@ class Notifier {
 		);
 
 		if ( $response instanceof \WP_Error ) {
-			throw new \Exception( $response->get_error_message() );
+			throw new \Exception( esc_html( $response->get_error_message() ) );
 		}
 
 		$data = json_decode( $response['body'], true );
 
-		if ( ! $data || is_wp_error( $data ) ) {
+		if ( ! $data || ! is_array( $data ) ) {
 			throw new \Exception( 'Could not read response from Clariti' );
 		}
 
-		if ( false === ( (bool) $data['ok'] ?? false ) ) {
+		if ( false === (bool) ( $data['ok'] ?? false ) ) {
 			// If Clariti replies with a 601 error code, clear the secret and
 			// prevent further requests until a new API key is added.
-			if ( 601 === ( (int) $data['error']['code'] ?? null ) ) {
+			if ( 601 === (int) ( $data['error']['code'] ?? null ) ) {
 				Admin::clear_secret();
 			}
 
-			throw new \Exception( "{$data['error']['code']} - {$data['error']['message']}" );
+			throw new \Exception( esc_html( "{$data['error']['code']} - {$data['error']['message']}" ) );
 		}
 
 		return $data;
@@ -526,6 +526,12 @@ class Notifier {
 	 * @return void
 	 */
 	public static function clear_secret_option() {
+		check_admin_referer( 'clear_secret', 'clear_secret_nonce' );
+
+		if ( ! current_user_can( Admin::CAPABILITY ) ) {
+			wp_die( esc_html__( 'You are not authorized to perform this action.', 'clariti' ) );
+		}
+
 		Admin::clear_secret();
 		Admin::send_admin_notification( 'clariti-updated-option', 'clariti-updated-option-success', 'Clariti Secret cleared!', 'success' );
 		$goback = add_query_arg( 'settings-updated', 'true', wp_get_referer() );

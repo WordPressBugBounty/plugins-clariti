@@ -40,7 +40,7 @@ class REST_API {
 	/**
 	 * Filters the REST API index to include our own data.
 	 *
-	 * @param WP_REST_Response $response Existing response object.
+	 * @param \WP_REST_Response $response Existing response object.
 	 * @return object
 	 */
 	public static function filter_rest_index( $response ) {
@@ -163,7 +163,7 @@ class REST_API {
 			);
 		}
 
-		$key = admin::get_api_key();
+		$key = Admin::get_api_key();
 
 		return array(
 			'ok'      => $key === $data['key'],

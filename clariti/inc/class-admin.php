@@ -94,7 +94,7 @@ class Admin {
 	public static function handle_settings_page() {
 		$key = self::get_api_key();
 
-		if ( ! empty( $_GET['verify'] ) && $key ) {
+		if ( ! empty( $_GET['verify'] ) && $key ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			Notifier::action_updated_option( self::API_KEY_OPTION, $key, $key );
 		}
 
@@ -104,7 +104,7 @@ class Admin {
 			false,
 			self::PAGE_SLUG
 		);
-		if ( ! empty( $_GET['advanced'] ) || get_option( self::API_HOST_OPTION ) ) {
+		if ( ! empty( $_GET['advanced'] ) || get_option( self::API_HOST_OPTION ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_settings_field(
 				self::API_HOST_OPTION,
 				__( 'API Host', 'clariti' ),
@@ -136,7 +136,7 @@ class Admin {
 				?>
 				<?php submit_button(); ?>
 			</form>
-			<?php if ( isset( $_GET['advanced'] ) && $_GET['advanced'] ) : ?>
+			<?php if ( isset( $_GET['advanced'] ) && (int) $_GET['advanced'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 				<form method="post" action="admin-post.php">
 					<table class="form-table" role="presentation">
 						<tbody>
@@ -150,6 +150,7 @@ class Admin {
 					</table>
 					<input type="hidden" name="action" value="clear_secret">
 					<input type="hidden" name="clear-secret" value="1">
+					<?php wp_nonce_field( 'clear_secret', 'clear_secret_nonce' ); ?>
 					<?php submit_button( 'Clear Secret' ); ?>
 				</form>
 			<?php endif; ?>
@@ -266,7 +267,7 @@ class Admin {
 	 * @return void
 	 */
 	public static function clear_secret(): void {
-		delete_option( Admin::API_SECRET_OPTION );
+		delete_option( self::API_SECRET_OPTION );
 	}
 
 	/**
@@ -275,7 +276,7 @@ class Admin {
 	 * @return string The API key.
 	 */
 	public static function get_api_key(): string {
-		$value = get_option( Admin::API_KEY_OPTION, '' );
+		$value = get_option( self::API_KEY_OPTION, '' );
 
 		return (string) $value;
 	}

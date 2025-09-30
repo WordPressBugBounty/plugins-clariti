@@ -6,7 +6,7 @@
  * Author URI:        https://clariti.com
  * Text Domain:       clariti
  * Domain Path:       /languages
- * Version:           1.2.1
+ * Version:           1.2.2
  * Requires at least: 6.0
  * Requires PHP:      7.4
  *
@@ -19,8 +19,8 @@ define( 'CLARITI_PLUGIN_FILE', __FILE__ );
  * Integration points with WordPress.
  */
 add_action( 'admin_menu', array( 'Clariti\Admin', 'action_admin_menu' ) );
-add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( 'Clariti\Admin', 'filter_plugin_action_links' ) );
-add_action( 'rest_index', array( 'Clariti\REST_API', 'filter_rest_index' ) );
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( 'Clariti\Admin', 'filter_plugin_action_links' ) );
+add_filter( 'rest_index', array( 'Clariti\REST_API', 'filter_rest_index' ) );
 add_action( 'rest_api_init', array( 'Clariti\REST_API', 'register_routes' ) );
 /**
  * Updates Clariti when various modification behaviors are performed.
@@ -75,7 +75,7 @@ function clariti_get_plugin_version() {
  * @return array
  */
 function clariti_get_supported_post_types() {
-	$post_types = get_post_types( array(), 'object' );
+	$post_types = get_post_types( array(), 'objects' );
 	$skipped    = array(
 		'nav_menu_item',
 		'wp_block',
@@ -88,11 +88,13 @@ function clariti_get_supported_post_types() {
 		if ( in_array( $post_type->name, $skipped, true ) ) {
 			continue;
 		}
-		// Has to public=true && show_in_rest=true.
+
+		// Post type must be public and have REST API support.
 		if ( empty( $post_type->public ) || empty( $post_type->show_in_rest ) ) {
 			continue;
 		}
-		// Has to support 'title' and 'editor'.
+
+		// Post type must support 'title' and 'editor'.
 		if ( ! post_type_supports( $post_type->name, 'title' ) || ! post_type_supports( $post_type->name, 'editor' ) ) {
 			continue;
 		}

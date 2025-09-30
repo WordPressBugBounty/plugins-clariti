@@ -17,8 +17,8 @@ class The_Blog_Fixer {
 	/**
 	 * Fires after an operation has been performed on a post.
 	 *
-	 * @param object $po   Post operation object.
-	 * @param object $post Post.
+	 * @param object   $po   Post operation object.
+	 * @param \WP_Post $post Post.
 	 */
 	public static function action_tbf_after_post_operation_execution( $po, $post ) {
 		if ( ! empty( $post->ID ) && 'publish' === $post->post_status ) {

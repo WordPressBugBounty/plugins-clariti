@@ -3,7 +3,7 @@ Contributors: clariti
 Tags: blogging, site optimization
 Requires at least: 6.0
 Tested up to: 6.8
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,12 @@ Clariti saves you loads of time. It's a solid replacement for the spreadsheet tr
 
 The Clariti Plugin does not alter any of your data. This plugin allows Clariti to sync all new and updated posts in near realtime.
 
+== Frequently Asked Questions ==
+
+= Where do I report security bugs? =
+
+Please report security bugs found in the source code of the Clariti plugin to security@clariti.com.
+
 == Installation ==
 
 The Clariti plugin can be installed much like any other WordPress plugin. **A Clariti account is required to use this plugin.**
@@ -42,6 +48,11 @@ To obtain the API key from Clariti, follow these steps:
 If the API key was installed successfully, you should see "Connected" within Clariti Settings in the WordPress Plugin panel.
 
 == Changelog ==
+
+= 1.2.2 (September 30, 2025) =
+
+* Fix an issue where a secondary key used in the connection to Clariti could be deleted by an authenticated user.
+* Improve nonce verification.
 
 = 1.2.1 (April 2, 2024) =
 * Fix an issue where an incorrect post ID was sent to Clariti when a recipe was updated.
